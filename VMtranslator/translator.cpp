@@ -2,8 +2,8 @@
 
 using namespace std;
 
-ifstream in("input.txt");
-ofstream out("output.vm");
+ifstream in;
+ofstream out;
 
 vector<string> split(string input) {
     string curr = "";
@@ -472,11 +472,20 @@ void runfunction(string name, string args) {
     out << "(fun_returnAddress_" << name << "_" << line << ")" << endl;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     string input;
 
     vector<int> funreturns;
     int currindex = -1;
+
+    if (argc != 2) {
+        throw runtime_error("VM translator didn't initiate, you must provide exactly 1 file");
+    }
+
+    string path = argv[1];
+
+    in = ifstream(path);
+    out = ofstream(path.substr(0, path.find_last_of('.')) + ".asm");
 
     while (getline(in, input)) {
         vector<string> parsed = split(input);
