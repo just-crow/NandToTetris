@@ -154,11 +154,20 @@ bitset<16> C(string inst) {
     return ret;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     int currinstruction = 0;
 
-    ifstream in("code.asm");
-    ofstream out("BinaryCode.hack");
+    ifstream in;
+    ofstream out;
+
+    if (argc != 2) {
+        throw runtime_error("Assembly compiler didn't initiate, you must provide exactly 1 file");
+    }
+
+    string path = argv[1];
+
+    in = ifstream(path);
+    out = ofstream(path.substr(0, path.find_last_of('.')) + ".asm");
     
     string inst;
 
