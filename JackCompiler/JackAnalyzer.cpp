@@ -3,9 +3,26 @@
 
 using namespace std;
 
+// Finished VM:
+
+/*
+IfStatements
+VarDec
+LetStatements
+WhileStatements
+DoStatements
+SubroutineDec
+ParameterList
+SubroutineCall
+ExpressionList
+Term
+Expression
+*/
+
 ifstream in;
-ofstream outt("Tokens.xml");
+ofstream outt;
 ofstream outf;
+ofstream outv;
 
 int tokensize;
 
@@ -152,14 +169,103 @@ vector<string> tokenizeLine(string s) {
     return ret;
 }
 
+
 struct typetoken {
     string type;
     string value;
     string fullt;
 };
 
+struct tableel {
+    string type;
+    string kind;
+    int index;
+
+    tableel() = default;
+    tableel(string t, string k, int i) : type(t), kind(k), index(i) {}
+};
+
+void printtable(unordered_map<string, tableel> t) {
+    for (const auto& [key, value] : t) {
+        cout << key << ": " << value.type << ", " << value.kind << ", " << value.index << endl;
+    }
+}
+
+class VMwriter {
+    public:
+        void writePush(string seg, int ind) {
+            outv << "push " << seg << " " << ind << endl;
+        }
+
+        void writePop(string seg, int ind) {
+            outv << "pop " << seg << " " << ind << endl;
+        }
+
+        void writeLabel(string label) {
+            outv << "label " << label << endl;
+        }
+
+        void writeIfGoto(string label) {
+            outv << "if-goto " << label << endl;
+        }
+
+        void writeNeg() {
+            outv << "neg" << endl;
+        }
+
+        void writeGoto(string label) {
+            outv << "goto " << label << endl;
+        }
+
+        void writeNot() {
+            outv << "not" << endl;
+        }
+
+        void writeAdd() {
+            outv << "add" << endl;
+        }
+
+        void writeFunction(string name, int lcl) {
+            outv << "function " << name << " " << lcl << endl;
+        }
+
+        void writeCall(string name, int arg) {
+            outv << "call " << name << " " << arg << endl; 
+        }
+
+        void writeReturn() {
+            outv << "return" << endl;
+        }
+
+        void writeEq() {
+            outv << "eq" << endl;
+        }
+
+        void writeGt() {
+            outv << "gt" << endl;
+        }
+
+        void writeLt() {
+            outv << "lt" << endl;
+        }
+
+        void writeAnd() {
+            outv << "and" << endl;
+        }
+
+        void writeOr() {
+            outv << "or" << endl;
+        }
+
+        void writeSub() {
+            outv << "sub" << endl;
+        }
+};
+
 class CompilationEngine {
     vector<string> typesTks = {"int", "char", "boolean"};
+
+    string className = "N/A";
 
     int currtk = 0;
     typetoken tk;
@@ -169,7 +275,23 @@ class CompilationEngine {
 
     int indentnum = 0;
 
+    VMwriter VM;
+
+    int labelcount = 0;
+
     stack<string> position;
+
+    unordered_map<string, tableel> classTable;
+    unordered_map<string, int> classTableCounts = {
+        {"field", 0},
+        {"static", 0}
+    };
+
+    unordered_map<string, tableel> subTable;
+    int localcount = 0;
+
+    unordered_map<string, string> functions;
+    unordered_set<string> vfunctions;
 
     public:
         CompilationEngine(vector<string> paratokenlist) {
@@ -247,6 +369,26 @@ class CompilationEngine {
             }
         }
 
+        bool is_int(string s) {
+            for (char i: s) {
+                if ((char)i < '0' or (char)i > '9') {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        tableel findvar(string name) {
+            if (subTable.find(name) != subTable.end()) {
+                return subTable[name];
+            } else if (classTable.find(name) != classTable.end()) {
+                return classTable[name];
+            } else {
+                throw runtime_error("Identifier not initialized: " + name);
+            }
+        }
+
         // Program Structure
 
         bool wordChecker(vector<string> words, string word) {
@@ -269,8 +411,11 @@ class CompilationEngine {
             next();
         }
 
-        void compileVarDec() {
+        int compileVarDec() {
             enter("varDec");
+            string name, type;
+
+            int amt = 1;
 
             check(tk.value, "var");
 
@@ -278,29 +423,50 @@ class CompilationEngine {
                 throw runtime_error("Expected a type, got " + tk.value);
             }
 
+            type = tk.value;
+
             write(tk.fullt);
             next();
 
+            name = tk.value;
+
             check(tk.type, "identifier");
+
+            subTable.emplace(name, tableel{type, "local", localcount});
+
+            ++localcount;
 
             while (tk.value == ",") {
                 write(tk.fullt);
                 next();
+
+                subTable.emplace(tk.value, tableel{type, "local", localcount});
+                ++localcount;
+
+                ++amt;
 
                 check(tk.type, "identifier");
             }
 
             check(tk.value, ";");
 
+            printtable(subTable);
+
             exit();
+
+            return amt;
         }
 
         void compileClassVarDec() {
             enter("classVarDec");
 
+            string name, kind, type;
+
             if (!(tk.value == "field" or tk.value == "static")) {
                 throw runtime_error("Expected a field or a static varable declaration, got " + tk.value);
             }
+
+            kind = tk.value;
 
             write(tk.fullt);
             next();
@@ -309,17 +475,29 @@ class CompilationEngine {
                 throw runtime_error("Expected a type, got " + tk.value);
             }
 
+            type = tk.value;
+
             write(tk.fullt);
             next();
 
+            name = tk.value;
+
             check(tk.type, "identifier");
+
+            classTable.emplace(name, tableel{type, kind, classTableCounts[kind]});
+            ++classTableCounts[kind];
 
             while (tk.value == ",") {
                 write(tk.fullt);
                 next();
 
+                classTable.emplace(tk.value, tableel{type, kind, classTableCounts[kind]});
+                ++classTableCounts[kind];
+
                 check(tk.type, "identifier");
             }
+
+            printtable(classTable);
 
             check(tk.value, ";");
 
@@ -329,11 +507,17 @@ class CompilationEngine {
         void compileSubroutineDec() {
             enter("subroutineDec");
 
+            int varnumber = 0;
+
+            string kind, type, name;
+
             if (!wordChecker({"method", "constructor", "function"}, tk.value)) {
                 throw runtime_error("Expected a subroutine declaration, got " + tk.value);
             }
 
             write(tk.fullt);
+
+            kind = tk.value;
 
             next();
 
@@ -343,29 +527,86 @@ class CompilationEngine {
                 throw runtime_error("Expected a type, got " + tk.value);
             }
 
+            type = tk.value;
+
             next();
+
+            name = tk.value;
+
+            functions[name] = kind;
+
+            if (type == "void") {
+                vfunctions.insert(name);
+            }
 
             check(tk.type, "identifier");
             check(tk.value, "(");
 
-            compileParameterList();
+            compileParameterList(kind == "method");
 
             check(tk.value, ")");
 
+            // SUBROUTINE BODY STARTING
+
+            enter("subroutineBody");
+
+            check(tk.value, "{");
+
+            int varnum = 0;
+
+            while (tk.value == "var") {
+                varnum += compileVarDec();
+            }
+
+            // SUBROUTINE BODY END, CONTINUING IN THE RESPECTIVE FUNCTION
+
+            VM.writeFunction(className + "." + name, varnum);
+
+            if (kind == "constructor") {
+                VM.writePush("constant", classTableCounts["field"]);
+                VM.writeCall("Memory.alloc", 1);
+                VM.writePop("pointer", 0);
+            }
+
+            if (kind == "method") {
+                VM.writePush("argument", 0);
+                VM.writePop("pointer", 0);
+            }
+
             compileSubroutineBody();
+
+            subTable = {};
+            localcount = 0;
 
             exit();
         }
 
-        void compileParameterList() {
+        void compileParameterList(bool mtd) {
             enter("parameterList");
+
+            string name, type;
+
+            int argc = 0;
+
+            if (mtd) {
+                ++argc;
+            }
 
             if ((wordChecker(typesTks, tk.value) or tk.type == "identifier")) {
                 write(tk.fullt);
+
+                type = tk.value;
+
                 next();
 
+                name = tk.value;
+
                 check(tk.type, "identifier");
+
+                subTable.emplace(name, tableel{type, "argument", argc});
             }
+
+            ++argc;
 
             while (tk.value == ",") {
                 write(tk.fullt);
@@ -373,9 +614,16 @@ class CompilationEngine {
 
                 if ((wordChecker(typesTks, tk.value) or tk.type == "identifier")) {
                     write(tk.fullt);
+
+                    type = tk.value;
+
                     next();
+
+                    name = tk.value;
     
                     check(tk.type, "identifier");
+
+                    subTable.emplace(name, tableel{type, "argument", argc});
                 }
             }
 
@@ -383,13 +631,6 @@ class CompilationEngine {
         }
 
         void compileSubroutineBody() {
-            enter("subroutineBody");
-
-            check(tk.value, "{");
-
-            while (tk.value == "var") {
-                compileVarDec();
-            }
 
             if (tk.value != "}") {
                 compileStatements();
@@ -411,18 +652,33 @@ class CompilationEngine {
 
             check(tk.value, "if");
             check(tk.value, "(");
+
             compileExpression();
             check(tk.value, ")");
             check(tk.value, "{");
+
+            int conserve = labelcount;
+            ++labelcount;
+
+            VM.writeNot();
+            VM.writeIfGoto("if_label_end_" + to_string(conserve));
+
             compileStatements();
+
+            VM.writeGoto("full_if_label_end_" + to_string(conserve));
             check(tk.value, "}");
+
+            VM.writeLabel("if_label_end_" + to_string(conserve));
 
             if (tk.value == "else") {
                 check(tk.value, "else");
                 check(tk.value, "{");
+
                 compileStatements();
                 check(tk.value, "}");
             }
+
+            VM.writeLabel("full_if_label_end_" + to_string(conserve));
 
             exit();
         }
@@ -431,16 +687,40 @@ class CompilationEngine {
             enter("letStatement");
 
             check(tk.value, "let");
+
+            string name = tk.value;
+            tableel info;
+
             check(tk.type, "identifier");
 
+            info = findvar(name);
+
+            bool arrass = false;
+
             if (tk.value == "[") {
+                arrass = true;
+
+                VM.writePush(info.kind, info.index);
+
                 check(tk.value, "[");
                 compileExpression();
                 check(tk.value, "]");
+
+                VM.writeAdd();
             }
 
             check(tk.value, "=");
             compileExpression();
+
+            if (arrass) {
+                VM.writePop("temp", 0);
+                VM.writePop("pointer", 1);
+                VM.writePush("temp", 0);
+                VM.writePop("that", 0);
+            } else {
+                VM.writePop(info.kind, info.index);
+            }
+
             check(tk.value, ";");
 
             exit();
@@ -451,11 +731,25 @@ class CompilationEngine {
 
             check(tk.value, "while");
             check(tk.value, "(");
+
+            string conserve = to_string(labelcount);
+            ++labelcount;
+
+            VM.writeLabel("while_start_" + conserve);
+
             compileExpression();
+
+            VM.writeNot();
+            VM.writeIfGoto("while_end_" + conserve);
+
             check(tk.value, ")");
             check(tk.value, "{");
             compileStatements();
             check(tk.value, "}");
+
+            VM.writeGoto("while_start_" + conserve);
+
+            VM.writeLabel("while_end_" + conserve);
 
             exit();
         }
@@ -465,6 +759,9 @@ class CompilationEngine {
 
             check(tk.value, "do");
             compileSubroutineCall();
+
+            VM.writePop("temp", 0);
+
             check(tk.value, ";");
 
             exit();
@@ -477,7 +774,11 @@ class CompilationEngine {
 
             if (tk.value != ";") {
                 compileExpression();
+            } else {
+                VM.writePush("constant", 0);
             }
+
+            VM.writeReturn();
 
             check(tk.value, ";");
 
@@ -517,8 +818,13 @@ class CompilationEngine {
         void compileTerm() {
             enter("term");
 
+            stack<string> urnops;
+
             while (tk.value == "-" or tk.value == "~") {
                 write(tk.fullt);
+
+                urnops.push(tk.value);
+
                 next();
             }
 
@@ -534,24 +840,70 @@ class CompilationEngine {
             } else if (tk.type == "identifier") {
                 next(1);
 
+                string name = tk.value;
+
                 if (pk.value == "(" or pk.value == ".") {
                     compileSubroutineCall();
-                } else if (pk.value == "[") {
-                    write(tk.fullt);
-                    next();
-
-                    check(tk.value, "[");
-
-                    compileExpression();
-
-                    check(tk.value, "]");
                 } else {
-                    write(tk.fullt);
-                    next();
+                    tableel info = findvar(name);
+                
+                    if (pk.value == "[") {
+                        write(tk.fullt);
+                        next();
+
+                        VM.writePush(info.kind, info.index);
+
+                        check(tk.value, "[");
+
+                        compileExpression();
+
+                        check(tk.value, "]");
+
+                        VM.writeAdd();
+                        VM.writePop("pointer", 1);
+                        VM.writePush("that", 0);
+                    } else {
+                        write(tk.fullt);
+
+                        VM.writePush(info.kind, info.index);
+
+                        next();
+                    }
                 }
             } else {
                 write(tk.fullt);
+
+                if (is_int(tk.value)) {
+                    VM.writePush("constant", stoi(tk.value));
+                } else if (tk.value == "true") {
+                    VM.writePush("constant", 0);
+                    VM.writeNot();
+                } else if (tk.value == "false" or tk.value == "null") {
+                    VM.writePush("constant", 0);
+                } else if (tk.value == "this") {
+                    VM.writePush("pointer", 0);
+                } else {
+                    VM.writePush("constant", tk.value.length());
+                    VM.writeCall("String.new", 1);
+                    
+                    for (char i: tk.value) {
+                        VM.writePush("constant", i);
+                        VM.writeCall("String.appendChar", 2);
+                    }
+                }
+
                 next();
+            }
+
+            while (!urnops.empty()) {
+                string currop = urnops.top();
+                urnops.pop();
+
+                if (currop == "-") {
+                    VM.writeNeg();
+                } else {
+                    VM.writeNot();
+                }
             }
 
             exit();
@@ -562,46 +914,113 @@ class CompilationEngine {
 
             compileTerm();
 
-            vector<string> ops = {"+", "-", "*", "/", "&", "|", "<", ">", "?", "="};
+            vector<string> ops = {"+", "-", "*", "/", "&", "|", "<", ">", "="};
 
             while (wordChecker(ops, tk.value)) {
                 write(tk.fullt);
+
+                string op = tk.value;
+
                 next();
 
                 compileTerm();
-            }
 
-            exit();
-        }
-
-        void compileExpressionList() {
-            enter("expressionList");
-            
-            if (tk.type != "symbol" or tk.value == "-" or tk.value == "~") {
-                compileExpression();
-
-                while (tk.value == ",") {
-                    check(tk.value, ",");
-
-                    compileExpression();
+                if (op == "+") {
+                    VM.writeAdd();
+                } else if (op == "-") {
+                    VM.writeSub();
+                } else if (op == "*") {
+                    VM.writeCall("Math.multiply", 2);
+                } else if (op == "/") {
+                    VM.writeCall("Math.divide", 2);
+                } else if (op == "&") {
+                    VM.writeAnd();
+                } else if (op == "|") {
+                    VM.writeOr();
+                } else if (op == "<") {
+                    VM.writeLt();
+                } else if (op == ">") {
+                    VM.writeGt();
+                } else {
+                    VM.writeEq();
                 }
             }
 
             exit();
         }
 
+        int compileExpressionList() {
+            enter("expressionList");
+
+            int num = 0;
+            
+            if (tk.type != "symbol" or tk.value == "-" or tk.value == "~") {
+                compileExpression();
+
+                ++num;
+
+                while (tk.value == ",") {
+                    check(tk.value, ",");
+
+                    compileExpression();
+
+                    ++num;
+                }
+            }
+
+            exit();
+
+            return num;
+        }
+
         void compileSubroutineCall() {
+            string name = tk.value;
+            string funcname;
+
             check(tk.type, "identifier");
 
+            bool mtd = false;
+
             if (tk.value == ".") {
+                mtd = true;
+
                 check(tk.value, ".");
+
+                funcname = tk.value;
 
                 check(tk.type, "identifier");
             }
 
             check(tk.value, "(");
 
-            compileExpressionList();
+            int argc = 0;
+
+            tableel info;
+
+            bool constr = false;
+
+            if (mtd) {
+                try {
+                    info = findvar(name);
+                    VM.writePush(info.kind, info.index);
+                    ++argc;
+                } catch (runtime_error _) {
+                    cout << "Defaulted to constructor";
+                    constr = true;
+                }
+            }
+
+            argc += compileExpressionList();
+
+            if (mtd) {
+                if (constr) {
+                    VM.writeCall(name + "." + funcname, argc);
+                } else {
+                    VM.writeCall(info.type + "." + funcname, argc);
+                }
+            } else {
+                VM.writeCall(className + "." + name, argc);
+            }
 
             check(tk.value, ")");
         }
@@ -612,6 +1031,9 @@ class CompilationEngine {
             enter("class");
 
             check(tk.value, "class");
+
+            className = tk.value;
+
             check(tk.type, "identifier");
             check(tk.value, "{");
 
@@ -662,6 +1084,10 @@ int main(int argc, char* argv[]) {
     string parsepath = path.substr(0, path.find_last_of(".")) + ".xml";
 
     outf = ofstream(parsepath);
+
+    string VMpath = path.substr(0, path.find_last_of(".")) + ".vm";
+
+    outv = ofstream(VMpath);
 
     CompilationEngine tests = CompilationEngine(tokens);
     

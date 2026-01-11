@@ -1,0 +1,85 @@
+class Main {
+    static int staticVal;
+    field int fieldVal;
+
+    function void main() {
+        var Main m;
+        var Array arr;
+        var int i, result;
+
+        // TEST 1: Arithmetic & Logic Priority
+        // Expect: -5 because * happens before +
+        let result = 5 + 5 * -2; 
+        if (result = -5) {
+            do Output.printString("1. Math Priority: OK");
+        } else {
+            do Output.printString("1. Math Priority: FAIL");
+        }
+        do Output.println();
+
+        // TEST 2: Array Access (The "Complex" case)
+        // Uses: pop temp 0, pop pointer 1, push that 0
+        let arr = Array.new(5);
+        let i = 2;
+        let arr[i + 1] = 100; // Sets arr[3] = 100
+        if (arr[3] = 100) {
+            do Output.printString("2. Array Logic:   OK");
+        } else {
+            do Output.printString("2. Array Logic:   FAIL");
+        }
+        do Output.println();
+
+        // TEST 3: Objects, Fields, and Methods
+        // Checks: Constructor 'this' return, Method arg shifting
+        let m = Main.new(10); // Sets fieldVal = 10
+        // We pass 20. Method should add field(10) + arg(20) + static(0)
+        do m.testMethod(20); 
+
+        // TEST 4: Recursion
+        // Checks: Stack frame preservation
+        let result = Main.fib(6); // Should be 8
+        if (result = 8) {
+            do Output.printString("4. Recursion:     OK");
+        } else {
+            do Output.printString("4. Recursion:     FAIL");
+        }
+        do Output.println();
+        
+        // TEST 5: String Constants
+        // Checks: String.new, String.appendChar (chaining)
+        do Output.printString("5. String Loop:   OK");
+        do Output.println();
+
+        return;
+    }
+
+    constructor Main new(int val) {
+        let fieldVal = val;
+        let staticVal = 5;
+        return this;
+    }
+
+    // Method Test: Checks if 'this' (arg 0) and 'arg' (arg 1) are distinct
+    method void testMethod(int arg) {
+        var int sum;
+        let sum = fieldVal + arg + staticVal; // 10 + 20 + 5 = 35
+        
+        if (sum = 35) {
+            do Output.printString("3. Method Args:   OK");
+        } else {
+            do Output.printString("3. Method Args:   FAIL (Got ");
+            do Output.printInt(sum);
+            do Output.printString(")");
+        }
+        do Output.println();
+        return;
+    }
+
+    // Standard Fibonacci recursion
+    function int fib(int n) {
+        if (n < 2) {
+            return n;
+        }
+        return Main.fib(n - 1) + Main.fib(n - 2);
+    }
+}
