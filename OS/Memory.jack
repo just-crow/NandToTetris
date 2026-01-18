@@ -1,0 +1,55 @@
+class Memory {
+    static Array ram, heap, freelistend;
+
+    function void init() {
+        let ram = 0;
+        let heap = 2048;
+
+        let freelistend = 2048;
+
+        let heap[0] = 0;
+        let heap[1] = 14334;
+
+        return 0;
+    }
+
+    function int peek(int address) {
+        return ram[address];
+    }
+
+    function void poke(int address, int value) {
+        let ram[address] = value;
+
+        return 0;
+    }
+
+    function int alloc(int size) {
+        var Array curr;
+        var int newst;
+
+        let curr = heap;
+
+        while (~(curr = 0)) {
+            if ((curr[1] > (size + 2)) | (curr[1] = (size + 2))) {
+                let newst = curr[1] - size;
+                let curr[1] = curr[1] - size - 2;
+
+                let curr[newst] = 0;
+                let curr[newst + 1] = size;
+
+                return (newst + 2 + curr);
+            }
+
+            let curr = curr[0];
+        }
+
+        return 0;
+    }
+
+    function void dealloc(Array o) {
+        let freelistend[0] = o - 2;
+        let freelistend = o - 2;
+
+        return 0;
+    }
+}

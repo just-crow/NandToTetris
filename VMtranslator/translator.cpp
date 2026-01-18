@@ -222,7 +222,7 @@ void gt() {
     out << "D=M-D" << endl;
     out << "M=-1" << endl;
     out << "@gt_" << gtcount << endl;
-    out << "D;JGE" << endl;
+    out << "D;JGT" << endl;
     out << "@SP" << endl << endl;
     out << "A=M" << endl;
     out << "A=A-1" << endl;
@@ -241,7 +241,7 @@ void lt() {
     out << "D=M-D" << endl;
     out << "M=-1" << endl;
     out << "@lt_" << ltcount << endl;
-    out << "D;JLE" << endl;
+    out << "D;JLT" << endl;
     out << "@SP" << endl;
     out << "A=M" << endl;
     out << "A=A-1" << endl;
@@ -294,6 +294,28 @@ void pushval(string val) {
     out << "M=D" << endl;
 }
 
+void pushstatic(string place, string filename) {
+    out << "@" << filename << "_" << place << endl;
+    out << "D=M" << endl;
+    out << "@SP" << endl;
+    out << "M=M+1" << endl;
+    out << "A=M-1" << endl;
+    out << "M=D" << endl;
+}
+
+void popstatic(string place, string filename) {
+    out << "@" << filename << "_" << place << endl;
+    out << "D=A" << endl;
+    out << "@SP" << endl;
+    out << "M=M-1" << endl;
+    out << "A=M" << endl;
+    out << "M=D+M" << endl;
+    out << "D=M-D" << endl;
+    out << "M=M-D" << endl;
+    out << "A=M" << endl;
+    out << "M=D" << endl;
+}
+
 void pushsegval(string seg, string place) {
     out << "@" << segorder[seg] << endl;
     out << "D=M" << endl;
@@ -310,7 +332,8 @@ void pushinstseg(string seg, string place) {
     out << "@" << segorder[seg] << endl;
     out << "D=A" << endl;
     out << "@" << place << endl;
-    out << "D=D+A" << endl;
+    out << "A=D+A" << endl;
+    out << "D=M" << endl;
     out << "@SP" << endl;
     out << "M=M+1" << endl;
     out << "A=M-1" << endl;
@@ -484,6 +507,12 @@ int main(int argc, char* argv[]) {
 
     string path = argv[1];
 
+    int startpos = path.find_last_of((char)(92)) + 1;
+    int endpos = path.find_last_of('.');
+    int len = endpos - startpos;
+    
+    string fileName = path.substr(startpos, len);
+
     in = ifstream(path);
     out = ofstream(path.substr(0, path.find_last_of('.')) + ".asm");
 
@@ -522,7 +551,9 @@ int main(int argc, char* argv[]) {
         out << "// " << input << endl;
 
         if (c1 == "push") {
-            if (c2 == "temp" or c2 == "static") {
+            if (c2 == "static") {
+                pushstatic(c3, fileName);
+            } else if (c2 == "temp") {
                 pushinstseg(c2, c3);
             } else if (c2 == "constant") {
                 pushval(c3);
@@ -532,7 +563,9 @@ int main(int argc, char* argv[]) {
                 pushsegval(c2, c3);
             }
         } else if (c1 == "pop") {
-            if (c2 == "temp" or c2 == "static") {
+            if (c2 == "static") {
+                popstatic(c3, fileName);
+            } else if (c2 == "temp") {
                 popinstseg(c2, c3);
             } else if (c2 == "pointer") {
                 pointerpop(c3);

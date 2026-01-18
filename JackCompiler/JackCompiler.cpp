@@ -3,22 +3,6 @@
 
 using namespace std;
 
-// Finished VM:
-
-/*
-IfStatements
-VarDec
-LetStatements
-WhileStatements
-DoStatements
-SubroutineDec
-ParameterList
-SubroutineCall
-ExpressionList
-Term
-Expression
-*/
-
 ifstream in;
 ofstream outt;
 ofstream outf;
@@ -624,8 +608,12 @@ class CompilationEngine {
                     check(tk.type, "identifier");
 
                     subTable.emplace(name, tableel{type, "argument", argc});
+
+                    ++argc;
                 }
             }
+
+            printtable(subTable);
 
             exit();
         }

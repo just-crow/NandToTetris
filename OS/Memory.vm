@@ -1,0 +1,152 @@
+function Memory.init 0
+push constant 0
+pop static 0
+push constant 2048
+pop static 1
+push constant 2048
+pop static 2
+push static 1
+push constant 0
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push static 1
+push constant 1
+add
+push constant 14334
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Memory.peek 0
+push static 0
+push argument 0
+add
+pop pointer 1
+push that 0
+return
+function Memory.poke 0
+push static 0
+push argument 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Memory.alloc 2
+push static 1
+pop local 0
+label while_start_0
+push local 0
+push constant 0
+eq
+not
+not
+if-goto while_end_0
+push local 0
+push constant 1
+add
+pop pointer 1
+push that 0
+push argument 0
+push constant 2
+add
+gt
+push local 0
+push constant 1
+add
+pop pointer 1
+push that 0
+push argument 0
+push constant 2
+add
+eq
+or
+not
+if-goto if_label_end_1
+push local 0
+push constant 1
+add
+pop pointer 1
+push that 0
+push argument 0
+sub
+pop local 1
+push local 0
+push constant 1
+add
+push local 0
+push constant 1
+add
+pop pointer 1
+push that 0
+push argument 0
+sub
+push constant 2
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push local 1
+add
+push constant 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 0
+push local 1
+push constant 1
+add
+add
+push argument 0
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
+push constant 2
+add
+push local 0
+add
+return
+goto full_if_label_end_1
+label if_label_end_1
+label full_if_label_end_1
+push local 0
+push constant 0
+add
+pop pointer 1
+push that 0
+pop local 0
+goto while_start_0
+label while_end_0
+push constant 0
+return
+function Memory.dealloc 0
+push static 2
+push constant 0
+add
+push argument 0
+push constant 2
+sub
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 0
+push constant 2
+sub
+pop static 2
+push constant 0
+return

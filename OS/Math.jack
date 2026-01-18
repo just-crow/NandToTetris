@@ -1,0 +1,115 @@
+class Math {
+    static Array twoToThe;
+    static bool color;
+
+    function void init() {
+        let twoToThe = Array.new(16);
+
+        let twoToThe[0] = 1;
+        let twoToThe[1] = 2;
+        let twoToThe[2] = 4;
+        let twoToThe[3] = 8;
+        let twoToThe[4] = 16;
+        let twoToThe[5] = 32;
+        let twoToThe[6] = 64;
+        let twoToThe[7] = 128;
+        let twoToThe[8] = 256;
+        let twoToThe[9] = 512;
+        let twoToThe[10] = 1024;
+        let twoToThe[11] = 2048;
+        let twoToThe[12] = 4096;
+        let twoToThe[13] = 8192;
+        let twoToThe[14] = 16384;
+        let twoToThe[15] = 16384 + 16384;
+
+        return 0;
+    }
+
+    function int abs(int a) {
+        if (a < 0) {
+            return -a;
+        } else {
+            return a;
+        }
+    }
+
+    function int multiply(int a, int b) {
+        var int sum, shifta, bitchecker, i;
+
+        let sum = 0;
+        let bitchecker = 1;
+        let shifta = a;
+
+        while (i < 16) {
+            if (~(b & bitchecker = 0)) {
+                let sum = sum + shifta;
+            }
+
+            let bitchecker = bitchecker + bitchecker;
+            let shifta = shifta + shifta;
+
+            let i = i + 1;
+        }
+
+        return sum;
+    }
+
+    function int dividebody(int a, int b) {
+        var int q, sign;
+
+        if ((b > a) | (b < 0)) {
+            return 0;
+        }
+
+        let q = dividebody(a, b + b);
+
+        if ((a - ((q + q) * b)) < b) {
+            return q + q;
+        } else {
+            return q + q + 1;
+        }
+    }
+
+    function int divide(int a, int b) {
+        if (((a < 0) | (b < 0)) & ~((a < 0) & (b < 0))) {
+            return -dividebody(abs(a), abs(b));
+        } else {
+            return dividebody(abs(a), abs(b));
+        }
+    }
+
+    function int sqrt(int a) {
+        var int i, it, added;
+
+        let added = 0;
+        let i = 7;
+
+        while ((i > 0) | (i = 0)) {
+            let it = (added + twoToThe[i]) * (added + twoToThe[i]);
+
+            if ((it < a) | (it = a) & (it > 0)) {
+                let added = added + twoToThe[i];
+            }
+
+            let i = i - 1;
+        }
+
+        return added;
+    }
+
+    function int max(int a, int b) {
+        if (a > b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+
+    function int min(int a, int b) {
+        if (a < b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+}
