@@ -1,0 +1,101 @@
+function Keyboard.keyPressed 0
+push constant 24576
+call Memory.peek 1
+return
+function Keyboard.readChar 1
+call Keyboard.keyPressed 0
+pop local 0
+push constant 1
+call Output.displayCursor 1
+pop temp 0
+label while_start_0
+push local 0
+push constant 0
+eq
+not
+if-goto while_end_0
+call Keyboard.keyPressed 0
+pop local 0
+goto while_start_0
+label while_end_0
+label while_start_1
+call Keyboard.keyPressed 0
+push local 0
+eq
+not
+if-goto while_end_1
+goto while_start_1
+label while_end_1
+push local 0
+push constant 128
+lt
+not
+if-goto if_label_end_2
+push local 0
+call Output.printChar 1
+pop temp 0
+goto full_if_label_end_2
+label if_label_end_2
+label full_if_label_end_2
+push constant 0
+call Output.displayCursor 1
+pop temp 0
+push local 0
+return
+function Keyboard.readLine 3
+push constant 64
+call String.new 1
+pop local 0
+push argument 0
+call Output.printString 1
+pop temp 0
+call Keyboard.readChar 0
+pop local 1
+label while_start_3
+push local 1
+push constant 128
+eq
+not
+not
+if-goto while_end_3
+push local 1
+push constant 129
+eq
+not
+if-goto if_label_end_4
+push local 0
+call String.length 1
+push constant 0
+gt
+not
+if-goto if_label_end_5
+call Output.backSpace 0
+pop temp 0
+push local 0
+call String.eraseLastChar 1
+pop temp 0
+goto full_if_label_end_5
+label if_label_end_5
+label full_if_label_end_5
+goto full_if_label_end_4
+label if_label_end_4
+push local 0
+push local 1
+call String.appendChar 2
+pop temp 0
+label full_if_label_end_4
+call Keyboard.readChar 0
+pop local 1
+goto while_start_3
+label while_end_3
+call Output.println 0
+pop temp 0
+push local 0
+return
+function Keyboard.readInt 1
+push argument 0
+call Keyboard.readLine 1
+pop local 0
+push local 0
+call String.intValue 1
+return

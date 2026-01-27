@@ -1477,29 +1477,66 @@ push temp 0
 pop that 0
 push constant 0
 return
-function Output.moveCursor 0
-push argument 1
+function Output.displayCursor 0
+push argument 0
+call Screen.setColor 1
+pop temp 0
+push static 1
 push constant 8
 call Math.multiply 2
-push argument 0
+push static 2
 push constant 11
 call Math.multiply 2
-push argument 1
+push static 1
 push constant 8
 call Math.multiply 2
 push constant 7
 add
-push argument 0
+push static 2
 push constant 11
 call Math.multiply 2
 push constant 10
 add
 call Screen.drawRectangle 4
 pop temp 0
+push argument 0
+pop static 3
+push constant 0
+return
+function Output.moveCursor 0
 push argument 1
 pop static 1
 push argument 0
 pop static 2
+push static 3
+push constant 1
+eq
+not
+if-goto if_label_end_1
+push constant 1
+call Screen.setColor 1
+pop temp 0
+push static 1
+push constant 8
+call Math.multiply 2
+push static 2
+push constant 11
+call Math.multiply 2
+push static 1
+push constant 8
+call Math.multiply 2
+push constant 7
+add
+push static 2
+push constant 11
+call Math.multiply 2
+push constant 10
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto full_if_label_end_1
+label if_label_end_1
+label full_if_label_end_1
 push constant 0
 return
 function Output.println 0
@@ -1512,26 +1549,84 @@ pop temp 0
 push constant 0
 return
 function Output.backSpace 0
+push static 3
+push constant 1
+eq
+not
+if-goto if_label_end_2
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push static 1
+push constant 8
+call Math.multiply 2
+push static 2
+push constant 11
+call Math.multiply 2
+push static 1
+push constant 8
+call Math.multiply 2
+push constant 7
+add
+push static 2
+push constant 11
+call Math.multiply 2
+push constant 10
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto full_if_label_end_2
+label if_label_end_2
+label full_if_label_end_2
 push static 1
 push constant 0
 eq
 not
-if-goto if_label_end_1
+if-goto if_label_end_3
 push static 2
 push constant 1
 sub
 push constant 63
 call Output.moveCursor 2
 pop temp 0
-goto full_if_label_end_1
-label if_label_end_1
+goto full_if_label_end_3
+label if_label_end_3
 push static 2
 push static 1
 push constant 1
 sub
 call Output.moveCursor 2
 pop temp 0
-label full_if_label_end_1
+label full_if_label_end_3
+push static 3
+push constant 0
+eq
+not
+if-goto if_label_end_4
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push static 1
+push constant 8
+call Math.multiply 2
+push static 2
+push constant 11
+call Math.multiply 2
+push static 1
+push constant 8
+call Math.multiply 2
+push constant 7
+add
+push static 2
+push constant 11
+call Math.multiply 2
+push constant 10
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto full_if_label_end_4
+label if_label_end_4
+label full_if_label_end_4
 push constant 0
 return
 function Output.printChar 4
@@ -1561,13 +1656,13 @@ and
 push constant 1
 eq
 not
-if-goto if_label_end_2
-label while_start_3
+if-goto if_label_end_5
+label while_start_6
 push local 2
 push constant 11
 lt
 not
-if-goto while_end_3
+if-goto while_end_6
 push local 1
 push local 3
 add
@@ -1595,16 +1690,16 @@ push local 3
 push constant 32
 add
 pop local 3
-goto while_start_3
-label while_end_3
-goto full_if_label_end_2
-label if_label_end_2
-label while_start_4
+goto while_start_6
+label while_end_6
+goto full_if_label_end_5
+label if_label_end_5
+label while_start_7
 push local 2
 push constant 11
 lt
 not
-if-goto while_end_4
+if-goto while_end_7
 push local 1
 push local 3
 add
@@ -1631,9 +1726,9 @@ push local 3
 push constant 32
 add
 pop local 3
-goto while_start_4
-label while_end_4
-label full_if_label_end_2
+goto while_start_7
+label while_end_7
+label full_if_label_end_5
 call Output.advance 0
 pop temp 0
 push constant 0
@@ -1643,7 +1738,7 @@ push argument 0
 push constant 10
 lt
 not
-if-goto if_label_end_5
+if-goto if_label_end_8
 push argument 0
 push constant 48
 add
@@ -1651,9 +1746,9 @@ call Output.printChar 1
 pop temp 0
 push argument 0
 return
-goto full_if_label_end_5
-label if_label_end_5
-label full_if_label_end_5
+goto full_if_label_end_8
+label if_label_end_8
+label full_if_label_end_8
 push argument 0
 push argument 0
 push constant 10
@@ -1673,16 +1768,41 @@ push argument 0
 push constant 0
 lt
 not
-if-goto if_label_end_6
+if-goto if_label_end_9
 push constant 45
 call Output.printChar 1
 pop temp 0
-goto full_if_label_end_6
-label if_label_end_6
-label full_if_label_end_6
+goto full_if_label_end_9
+label if_label_end_9
+label full_if_label_end_9
 push argument 0
 call Math.abs 1
 call Output.printIntBody 1
 pop temp 0
+push constant 0
+return
+function Output.printString 2
+push argument 0
+call String.length 1
+pop local 0
+push constant 0
+pop local 1
+label while_start_10
+push local 1
+push local 0
+lt
+not
+if-goto while_end_10
+push argument 0
+push local 1
+call String.charAt 2
+call Output.printChar 1
+pop temp 0
+push local 1
+push constant 1
+add
+pop local 1
+goto while_start_10
+label while_end_10
 push constant 0
 return

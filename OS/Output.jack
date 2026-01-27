@@ -1,6 +1,7 @@
 class Output {
     static Array charMaps;
     static int cursorx, cursory;
+    static bool cursordisp;
 
     function void init() {
         let cursorx = 0;
@@ -148,11 +149,23 @@ class Output {
         return 0;
     }
 
-    function void moveCursor(int i, int j) {
-        do Screen.drawRectangle(j*8, i*11, (j*8) + 7, (i*11) + 10);
+    function void displayCursor(int color) {
+        do Screen.setColor(color);
+        do Screen.drawRectangle(cursorx*8, cursory*11, (cursorx*8) + 7, (cursory*11) + 10);
 
+        let cursordisp = color;
+
+        return 0;
+    }
+
+    function void moveCursor(int i, int j) {
         let cursorx = j;
         let cursory = i;
+
+        if (cursordisp = 1) {
+            do Screen.setColor(1);
+            do Screen.drawRectangle(cursorx*8, cursory*11, (cursorx*8) + 7, (cursory*11) + 10);
+        }
 
         return 0;
     }
@@ -164,10 +177,20 @@ class Output {
     }
 
     function void backSpace() {
+        if (cursordisp = 1) {
+            do Screen.setColor(0);
+            do Screen.drawRectangle(cursorx*8, cursory*11, (cursorx*8) + 7, (cursory*11) + 10);
+        }
+
         if (cursorx = 0) {
             do moveCursor(cursory - 1, 63);
         } else {
             do moveCursor(cursory, cursorx - 1);
+        }
+
+        if (cursordisp = 0) {
+            do Screen.setColor(0);
+            do Screen.drawRectangle(cursorx*8, cursory*11, (cursorx*8) + 7, (cursory*11) + 10);
         }
 
         return 0;
@@ -222,6 +245,20 @@ class Output {
         }
 
         do printIntBody(Math.abs(i));
+
+        return 0;
+    }
+
+    function void printString(String str) {
+        var int len, i;
+
+        let len = str.length();
+        let i = 0;
+
+        while (i < len) {
+            do printChar(str.charAt(i));
+            let i = i + 1;
+        }
 
         return 0;
     }

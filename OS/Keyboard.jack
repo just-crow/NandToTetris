@@ -1,0 +1,63 @@
+class Keyboard {
+    function char keyPressed() {
+        return Memory.peek(24576);
+    }
+
+    function char readChar() {
+        var char pressed;
+        let pressed = keyPressed();
+
+        do Output.displayCursor(1);
+
+        while (pressed = 0) {
+            let pressed = keyPressed();
+        }
+
+        while (keyPressed() = pressed) {
+            // wait
+        }
+
+        if (pressed < 128) {
+            do Output.printChar(pressed);
+        }
+
+        do Output.displayCursor(0);
+
+        return pressed;
+    }
+
+    function String readLine(String message) {
+        var String str;
+        var char c, t;
+
+        let str = String.new(64);
+
+        do Output.printString(message);
+
+        let c = readChar();
+
+        while (~(c = 128)) {
+            if (c = 129) {
+                if (str.length() > 0) {
+                    do Output.backSpace();
+                    do str.eraseLastChar();
+                }
+            } else {
+                do str.appendChar(c);
+            }
+
+            let c = readChar();
+        }
+
+        do Output.println();
+
+        return str;
+    }
+
+    function int readInt(String message) {
+        var String line;
+        let line = readLine(message);
+
+        return line.intValue();
+    }
+}
