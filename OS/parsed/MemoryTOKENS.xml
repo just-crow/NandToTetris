@@ -216,7 +216,7 @@
 <symbol>}</symbol>
 <keyword>function</keyword>
 <keyword>void</keyword>
-<identifier>dealloc</identifier>
+<identifier>deAlloc</identifier>
 <symbol>(</symbol>
 <identifier>Array</identifier>
 <identifier>o</identifier>

@@ -1,0 +1,251 @@
+function String.new 0
+push constant 2
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+call Array.new 1
+pop this 0
+push constant 0
+pop this 1
+push pointer 0
+return
+function String.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Memory.deAlloc 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+function String.length 0
+push argument 0
+pop pointer 0
+push this 1
+return
+function String.charAt 0
+push argument 0
+pop pointer 0
+push this 0
+push argument 1
+add
+pop pointer 1
+push that 0
+return
+function String.setCharAt 0
+push argument 0
+pop pointer 0
+push this 0
+push argument 1
+add
+push argument 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function String.appendChar 0
+push argument 0
+pop pointer 0
+push this 0
+push this 1
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push this 1
+push constant 1
+add
+pop this 1
+push pointer 0
+return
+function String.eraseLastChar 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 1
+sub
+pop this 1
+push constant 0
+return
+function String.intValue 4
+push argument 0
+pop pointer 0
+push constant 0
+pop local 2
+push this 1
+push constant 1
+sub
+pop local 0
+push this 0
+push constant 0
+add
+pop pointer 1
+push that 0
+push constant 45
+eq
+not
+if-goto if_label_end_0
+push constant 1
+pop local 1
+goto full_if_label_end_0
+label if_label_end_0
+push constant 0
+pop local 1
+label full_if_label_end_0
+push constant 1
+pop local 3
+label while_start_1
+push local 0
+push local 1
+push constant 1
+sub
+gt
+not
+if-goto while_end_1
+push local 2
+push this 0
+push local 0
+add
+pop pointer 1
+push that 0
+push constant 48
+sub
+push local 3
+call Math.multiply 2
+add
+pop local 2
+push local 3
+push constant 10
+call Math.multiply 2
+pop local 3
+push local 0
+push constant 1
+sub
+pop local 0
+goto while_start_1
+label while_end_1
+push local 1
+push constant 1
+eq
+not
+if-goto if_label_end_2
+push local 2
+neg
+return
+goto full_if_label_end_2
+label if_label_end_2
+push local 2
+return
+label full_if_label_end_2
+function String.setIntBody 2
+push argument 2
+push constant 10
+lt
+not
+if-goto if_label_end_3
+push argument 1
+push argument 0
+add
+push argument 2
+push constant 48
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 0
+push constant 1
+add
+return
+goto full_if_label_end_3
+label if_label_end_3
+label full_if_label_end_3
+push argument 2
+push constant 10
+call Math.divide 2
+pop local 0
+push argument 0
+push argument 1
+push local 0
+call String.setIntBody 3
+push constant 1
+add
+pop local 1
+push argument 1
+push local 1
+push constant 1
+sub
+add
+push argument 2
+push local 0
+push constant 10
+call Math.multiply 2
+sub
+push constant 48
+add
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
+return
+function String.setInt 0
+push argument 0
+pop pointer 0
+push argument 1
+push constant 0
+lt
+not
+if-goto if_label_end_4
+push this 0
+push constant 0
+add
+push constant 45
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 1
+push this 0
+push argument 1
+call Math.abs 1
+call String.setIntBody 3
+pop this 1
+goto full_if_label_end_4
+label if_label_end_4
+push constant 0
+push this 0
+push argument 1
+call String.setIntBody 3
+pop this 1
+label full_if_label_end_4
+push constant 0
+return
+function String.newLine 0
+push constant 128
+return
+function String.backSpace 0
+push constant 129
+return
+function String.doubleQuote 0
+push constant 34
+return
+function String.main 1
+push constant 5
+call String.new 1
+pop local 0
+push local 0
+push constant 123
+call String.setInt 2
+pop temp 0
+push local 0
+call Output.printString 1
+pop temp 0
+push constant 0
+return

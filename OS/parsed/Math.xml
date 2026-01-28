@@ -8,6 +8,12 @@
     <identifier>twoToThe</identifier>
     <symbol>;</symbol>
   </classVarDec>
+  <classVarDec>
+    <keyword>static</keyword>
+    <identifier>bool</identifier>
+    <identifier>color</identifier>
+    <symbol>;</symbol>
+  </classVarDec>
   <subroutineDec>
     <keyword>function</keyword>
     <keyword>void</keyword>

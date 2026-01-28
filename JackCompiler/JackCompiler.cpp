@@ -1,12 +1,16 @@
 #include <bits/stdc++.h>
 #include <cctype>
+#include <filesystem>
 
 using namespace std;
+namespace fs = std::filesystem;
 
 ifstream in;
 ofstream outt;
 ofstream outf;
 ofstream outv;
+
+fs::path hp;
 
 int tokensize;
 
@@ -468,6 +472,10 @@ class CompilationEngine {
 
             check(tk.type, "identifier");
 
+            if (kind == "field") {
+                kind = "this";
+            }
+
             classTable.emplace(name, tableel{type, kind, classTableCounts[kind]});
             ++classTableCounts[kind];
 
@@ -547,7 +555,7 @@ class CompilationEngine {
             VM.writeFunction(className + "." + name, varnum);
 
             if (kind == "constructor") {
-                VM.writePush("constant", classTableCounts["field"]);
+                VM.writePush("constant", classTableCounts["this"]);
                 VM.writeCall("Memory.alloc", 1);
                 VM.writePop("pointer", 0);
             }
@@ -1039,20 +1047,18 @@ class CompilationEngine {
         }
 };
 
-int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        throw runtime_error("Compiler didn't initialize, you must provide exactly 1 file");
-    }
-
-    string path = argv[1];
-
+void compileFile(string path) {
     in = ifstream(path);
 
     string line;
 
     vector<string> tokens;
 
-    string tokenpath = path.substr(0, path.find_last_of(".")) + "TOKENS.xml";
+    fs::path ftpath = fs::path(path);
+
+    string parsedfpath = (ftpath.parent_path() / "parsed" / ftpath.filename()).string();
+
+    string tokenpath = parsedfpath.substr(0, parsedfpath.find_last_of(".")) + "TOKENS.xml";
 
     outt = ofstream(tokenpath);
 
@@ -1069,7 +1075,7 @@ int main(int argc, char* argv[]) {
 
     tokens.push_back("OVERFLOW");
 
-    string parsepath = path.substr(0, path.find_last_of(".")) + ".xml";
+    string parsepath = parsedfpath.substr(0, parsedfpath.find_last_of(".")) + ".xml";
 
     outf = ofstream(parsepath);
 
@@ -1077,8 +1083,30 @@ int main(int argc, char* argv[]) {
 
     outv = ofstream(VMpath);
 
-    CompilationEngine tests = CompilationEngine(tokens);
+    CompilationEngine comp = CompilationEngine(tokens);
     
-    tests.next();
-    tests.compileClass();
+    comp.next();
+    comp.compileClass();
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        throw runtime_error("Compiler didn't initialize, you must provide exactly 1 file/folder");
+    }
+
+    fs::file_status st = fs::status(argv[1]);
+
+    if (fs::is_directory(st)) {
+        fs::create_directory(fs::path(argv[1]) / "parsed");
+
+        for (fs::directory_entry entry: fs::directory_iterator(argv[1])) {
+            if (entry.path().string().find(".jack") != string::npos) {
+                compileFile(entry.path().string());
+            }
+        }
+    } else {
+        fs::create_directory(fs::path(argv[1]).parent_path() / "parsed");
+
+        compileFile(argv[1]);
+    }
 }

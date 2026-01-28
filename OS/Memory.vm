@@ -133,7 +133,7 @@ goto while_start_0
 label while_end_0
 push constant 0
 return
-function Memory.dealloc 0
+function Memory.deAlloc 0
 push static 2
 push constant 0
 add

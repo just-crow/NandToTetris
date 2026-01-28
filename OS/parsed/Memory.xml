@@ -470,7 +470,7 @@
   <subroutineDec>
     <keyword>function</keyword>
     <keyword>void</keyword>
-    <identifier>dealloc</identifier>
+    <identifier>deAlloc</identifier>
     <symbol>(</symbol>
     <parameterList>
       <identifier>Array</identifier>

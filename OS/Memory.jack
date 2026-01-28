@@ -46,7 +46,7 @@ class Memory {
         return 0;
     }
 
-    function void dealloc(Array o) {
+    function void deAlloc(Array o) {
         let freelistend[0] = o - 2;
         let freelistend = o - 2;
 

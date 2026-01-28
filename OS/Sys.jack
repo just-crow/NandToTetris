@@ -1,0 +1,43 @@
+class Sys {
+    function void init() {
+        do Math.init();
+        do Memory.init();
+        do Output.init();
+        do Screen.init();
+
+        do Main.main();
+
+        return 0;
+    }
+
+    function void halt() {
+        while(true) {
+            // inf
+        }
+    }
+
+    function void wait(int duration) {
+        var int i, j;
+
+        let i = 0;
+
+        while (i < duration) {
+            let j = 0;
+
+            while (j < 158) {
+                let j = j + 1;
+            }
+
+            let i = i + 1;
+        }
+
+        return 0;
+    }
+
+    function void error(int errorCode) {
+        do Output.printString("ERR");
+        do Output.printInt(errorCode);
+
+        return 0;
+    }
+}

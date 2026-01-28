@@ -5,6 +5,10 @@
 <identifier>Array</identifier>
 <identifier>twoToThe</identifier>
 <symbol>;</symbol>
+<keyword>static</keyword>
+<identifier>bool</identifier>
+<identifier>color</identifier>
+<symbol>;</symbol>
 <keyword>function</keyword>
 <keyword>void</keyword>
 <identifier>init</identifier>
