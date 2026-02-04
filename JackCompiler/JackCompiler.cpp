@@ -950,7 +950,7 @@ class CompilationEngine {
 
             int num = 0;
             
-            if (tk.type != "symbol" or tk.value == "-" or tk.value == "~") {
+            if (tk.type != "symbol" or tk.value == "-" or tk.value == "~" or tk.value == "(") {
                 compileExpression();
 
                 ++num;

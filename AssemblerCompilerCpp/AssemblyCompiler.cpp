@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
+#include <filesystem>
 
 using namespace std;
+namespace fs = std::filesystem;
 
 unordered_map<string, int> JUMPS = {
     {"", 0b000},
@@ -154,20 +156,14 @@ bitset<16> C(string inst) {
     return ret;
 }
 
-int main(int argc, char* argv[]) {
+void compileAssembly(string path) {
     int currinstruction = 0;
 
     ifstream in;
     ofstream out;
 
-    if (argc != 2) {
-        throw runtime_error("Assembly compiler didn't initiate, you must provide exactly 1 file");
-    }
-
-    string path = argv[1];
-
     in = ifstream(path);
-    out = ofstream(path.substr(0, path.find_last_of('.')) + ".asm");
+    out = ofstream(path.substr(0, path.find_last_of('.')) + ".hack");
     
     string inst;
 
@@ -196,5 +192,26 @@ int main(int argc, char* argv[]) {
         }
 
         out << '\n';
+    }
+}
+
+int main(int argc, char* argv[]) {
+
+    if (argc != 2) {
+        throw runtime_error("Assembly compiler didn't initiate, you must provide exactly 1 file");
+    }
+
+    string path = argv[1];
+
+    fs::file_status pathst = fs::status(path);
+
+    if (fs::is_directory(pathst)) {
+        for (fs::directory_entry entry: fs::directory_iterator(path)) {
+            if (entry.path().extension() == ".asm") {
+                compileAssembly(entry.path().string());
+            }
+        }
+    } else {
+        compileAssembly(path);
     }
 }
